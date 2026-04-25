@@ -56,9 +56,12 @@ body{
 }
 .banner{
     width:100%;
-    max-height:260px;
+    min-height:360px;
     overflow:hidden;
     background:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 .banner img{
     width:min(82%,520px);
@@ -222,7 +225,9 @@ body{
     }
     .banner{
         min-height:260px;
-        background-size:contain;
+        display:flex;
+        justify-content:center;
+        align-items:center;
     }
     .product-box{
         align-items:flex-start;

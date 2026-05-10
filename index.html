@@ -438,7 +438,7 @@ body{
 
 <div id="bafaPage" class="page" style="display:none;">
     <div class="header">
-        <h1>巴法云实时数据</h1>
+        <h1>樱桃园实时数据</h1>
         <p>设备上传数据 · 实时曲线 · Excel导出</p>
     </div>
 
@@ -463,7 +463,7 @@ body{
                 <div>工作状态：<span id="latest_work_state" class="data-value">--</span></div>
                 <div>预警类型：<span id="latest_warning_type" class="data-value">--</span></div>
                 <div>最新时间：<span id="latestTime" class="data-value">--</span></div>
-                <div class="status" id="bafaStatus">等待读取巴法云数据...</div>
+                <div class="status" id="bafaStatus">等待读取云端数据...</div>
             </div>
         </div>
 
@@ -815,7 +815,7 @@ function renderBafaChart(dataMap){
 
     const option = {
         title:{
-            text: "巴法云六项数据趋势图",
+            text: "樱桃园六项数据趋势图",
             left:"center"
         },
         tooltip:{
@@ -912,7 +912,7 @@ function clearLatestData(){
 
 function exportBafaExcel(){
     if(!currentBafaData || Object.keys(currentBafaData).length === 0){
-        alert("当前没有可导出的数据，请先读取巴法云数据。");
+        alert("当前没有可导出的数据，请先读取云端数据。");
         return;
     }
 
@@ -951,11 +951,11 @@ function exportBafaExcel(){
     });
 
     if(!hasData){
-        alert("当前没有可导出的数据，请先读取巴法云数据。");
+        alert("当前没有可导出的数据，请先读取云端数据。");
         return;
     }
 
-    XLSX.writeFile(workbook, "巴法云六项数据汇总.xlsx");
+    XLSX.writeFile(workbook, "樱桃园六项数据汇总.xlsx");
 }
 
 window.addEventListener("resize", function(){

@@ -56,20 +56,16 @@ body{
 }
 .banner{
     width:100%;
-    min-height:360px;
+    max-height:260px;
     overflow:hidden;
     background:#fff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
 }
-
 .banner img{
     width:min(82%,520px);
     height:auto;
     max-height:320px;
     object-fit:contain;
-    object-position:center center;
+    object-position:center;
     display:block;
 }
 .container{
@@ -220,15 +216,59 @@ body{
     color:#b30024;
     font-size:13px;
 }
+
+.chart-box{
+    width:100%;
+    height:420px;
+    background:#fff;
+    border-radius:14px;
+    border:1px solid #f0d7dc;
+    margin-top:12px;
+}
+.data-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:12px 0;
+}
+.small-btn{
+    padding:10px 14px;
+    border:none;
+    border-radius:10px;
+    background:#b30024;
+    color:#fff;
+    font-size:14px;
+    cursor:pointer;
+}
+.small-btn.gray{
+    background:#666;
+}
+.data-box{
+    background:#fff7f9;
+    border:1px solid #ffd2dc;
+    border-radius:14px;
+    padding:14px;
+    margin-top:12px;
+    line-height:1.9;
+    font-size:15px;
+}
+.data-value{
+    color:#b30024;
+    font-weight:bold;
+}
+.status{
+    margin-top:8px;
+    font-size:13px;
+    color:#888;
+}
+
 @media(max-width:600px){
     .header h1{
         font-size:24px;
     }
     .banner{
         min-height:260px;
-        display:flex;
-        justify-content:center;
-        align-items:center;
+        background-size:contain;
     }
     .product-box{
         align-items:flex-start;
@@ -252,7 +292,10 @@ body{
     }
 }
 </style>
-<link rel="stylesheet" href="/Static/css/Global.css"/><link rel="stylesheet" href="/Web/css/Global.css"/><link rel="stylesheet" href="/Web/css/XYChatGPT.css"/></head>
+<link rel="stylesheet" href="/Static/css/Global.css"/>
+<link rel="stylesheet" href="/Web/css/Global.css"/>
+<link rel="stylesheet" href="/Web/css/XYChatGPT.css"/>
+</head>
 
 <body>
 
@@ -285,7 +328,7 @@ body{
 
         <div class="card">
             <div class="title">🍒 樱桃展示</div>
-                <img class="card-img" src="https://q6.itc.cn/q_70/images03/20250606/3f0451d8c700440cbf46f1e29fafe265.jpeg" alt="樱桃成品">
+            <img class="card-img" src="https://q6.itc.cn/q_70/images03/20250606/3f0451d8c700440cbf46f1e29fafe265.jpeg" alt="樱桃成品">
             <p>精选成熟樱桃，果色鲜亮，口感清甜，适合鲜食与礼盒包装。</p>
         </div>
 
@@ -323,6 +366,10 @@ body{
         <div class="card">
             <button class="btn" onclick="showOrigin()">查看产地溯源信息</button>
         </div>
+
+        <div class="card">
+            <button class="btn" onclick="showBafa()">查看巴法云实时数据</button>
+        </div>
     </div>
 
     <div class="footer">
@@ -340,7 +387,7 @@ body{
     <div class="container">
         <div class="section">
             <div class="title">📍 产地位置</div>
-            <img class="section-img" src="ditu.png" alt="产地地图">
+            <img class="section-img" src="https://www.bing.com/maps/geoplat/REST/v1/Imagery/Map/RoadVibrantDark/40.324139,116.587547/16?pp=40.324139,116.587547;dfp.ss;%E6%9D%A8%E5%AE%B6%E4%B8%9C%E5%BA%84%E6%9D%91&logo=n&ml=Basemap,LandCover,Landmarks&od=2&shading=flat&fmt=png&dpi=Large&ms=1296,400&c=zh-CN&sv=9.46&key=AnTcaqBi2ypp0xI-OZNi4W_ik2KhjgpqioTAtXLC8GzkMBQRMlyxvxyTnd5b73im" alt="产地地图">
             <div class="text-box">
                 本批次樱桃产自生态果园种植区，产地周边自然环境良好，交通便利，适合鲜果采摘、分拣与冷链运输。
             </div>
@@ -389,19 +436,539 @@ body{
     <button class="back-btn" onclick="showMain()">返回主页面</button>
 </div>
 
+<div id="bafaPage" class="page" style="display:none;">
+    <div class="header">
+        <h1>巴法云实时数据</h1>
+        <p>设备上传数据 · 实时曲线 · Excel导出</p>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="title">📈 数据趋势图</div>
+            <div class="data-toolbar">
+                <button class="small-btn" onclick="loadBafaData(10)">10条</button>
+                <button class="small-btn" onclick="loadBafaData(20)">20条</button>
+                <button class="small-btn" onclick="loadBafaData(50)">50条</button>
+                <button class="small-btn" onclick="loadBafaData(100)">100条</button>
+                <button class="small-btn gray" onclick="exportBafaExcel()">导出Excel</button>
+            </div>
+
+            <div id="bafaChart" class="chart-box"></div>
+
+            <div class="data-box">
+                <div>环境温度：<span id="latest_env_temp" class="data-value">--</span></div>
+                <div>环境湿度：<span id="latest_env_humi" class="data-value">--</span></div>
+                <div>土壤湿度：<span id="latest_soil_moisture" class="data-value">--</span></div>
+                <div>预警状态：<span id="latest_alarm_state" class="data-value">--</span></div>
+                <div>工作状态：<span id="latest_work_state" class="data-value">--</span></div>
+                <div>预警类型：<span id="latest_warning_type" class="data-value">--</span></div>
+                <div>最新时间：<span id="latestTime" class="data-value">--</span></div>
+                <div class="status" id="bafaStatus">等待读取巴法云数据...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="title">📋 数据说明</div>
+            <div class="text-box">
+                本页面从巴法云三个主题读取六项数据：dapeng001temp 主题包含环境温度和环境湿度；dapeng001 主题包含土壤湿度和预警状态；dapeng001cmd 主题包含工作状态和预警类型。趋势图显示六项数据变化，导出 Excel 时会将六项数据分别独立保存到不同工作表。
+            </div>
+        </div>
+    </div>
+
+    <button class="back-btn" onclick="showMain()">返回主页面</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
+const BAFA_UID = "6b1cc3be167c4d599d7ab998ffdc5164";
+const BAFA_TYPE = "3";
+
+/*
+    根据你上传的硬件代码和图片，三个真实主题如下：
+
+    dapeng001temp：环境温度#环境湿度
+    dapeng001：土壤湿度#预警状态
+    dapeng001cmd：工作状态#预警类型
+*/
+const BAFA_TOPICS = [
+    {
+        topic: "dapeng001temp",
+        fields: [
+            {
+                key: "env_temp",
+                name: "环境温度",
+                latestId: "latest_env_temp",
+                type: "number",
+                unit: "℃"
+            },
+            {
+                key: "env_humi",
+                name: "环境湿度",
+                latestId: "latest_env_humi",
+                type: "number",
+                unit: "%"
+            }
+        ]
+    },
+    {
+        topic: "dapeng001",
+        fields: [
+            {
+                key: "soil_moisture",
+                name: "土壤湿度",
+                latestId: "latest_soil_moisture",
+                type: "number",
+                unit: "%"
+            },
+            {
+                key: "alarm_state",
+                name: "预警状态",
+                latestId: "latest_alarm_state",
+                type: "alarmState",
+                unit: ""
+            }
+        ]
+    },
+    {
+        topic: "dapeng001cmd",
+        fields: [
+            {
+                key: "work_state",
+                name: "工作状态",
+                latestId: "latest_work_state",
+                type: "workState",
+                unit: ""
+            },
+            {
+                key: "warning_type",
+                name: "预警类型",
+                latestId: "latest_warning_type",
+                type: "warningType",
+                unit: ""
+            }
+        ]
+    }
+];
+
+const WORK_STATE_TEXT = {
+    0: "等待初始化",
+    1: "正常工作",
+    2: "工作暂停"
+};
+
+const ALARM_STATE_TEXT = {
+    0: "正常",
+    1: "报警"
+};
+
+const WARNING_TYPE_TEXT = {
+    0: "正常",
+    1: "温度过高",
+    2: "温度过低",
+    3: "湿度过高",
+    4: "湿度过低",
+    5: "土壤过湿",
+    6: "土壤过干",
+    7: "传感器异常",
+    8: "WiFi异常",
+    9: "云端异常"
+};
+
+let bafaTimer = null;
+let bafaChart = null;
+let currentDataCount = 50;
+let currentBafaData = {};
+
 function showOrigin(){
     document.getElementById("mainPage").style.display="none";
     document.getElementById("originPage").style.display="block";
+    document.getElementById("bafaPage").style.display="none";
+    stopBafaAutoRefresh();
     window.scrollTo(0,0);
 }
+
+function showBafa(){
+    document.getElementById("mainPage").style.display="none";
+    document.getElementById("originPage").style.display="none";
+    document.getElementById("bafaPage").style.display="block";
+    window.scrollTo(0,0);
+    initBafaChart();
+    loadBafaData(currentDataCount);
+    startBafaAutoRefresh();
+}
+
 function showMain(){
     document.getElementById("originPage").style.display="none";
+    document.getElementById("bafaPage").style.display="none";
     document.getElementById("mainPage").style.display="block";
+    stopBafaAutoRefresh();
     window.scrollTo(0,0);
 }
+
+function startBafaAutoRefresh(){
+    stopBafaAutoRefresh();
+    bafaTimer = setInterval(function(){
+        loadBafaData(currentDataCount);
+    }, 5000);
+}
+
+function stopBafaAutoRefresh(){
+    if(bafaTimer){
+        clearInterval(bafaTimer);
+        bafaTimer = null;
+    }
+}
+
+function initBafaChart(){
+    const chartDom = document.getElementById("bafaChart");
+    if(!bafaChart){
+        bafaChart = echarts.init(chartDom);
+    }
+    setTimeout(function(){
+        bafaChart.resize();
+    }, 200);
+}
+
+function loadBafaData(num){
+    currentDataCount = num || currentDataCount;
+
+    document.getElementById("bafaStatus").innerText = "正在读取巴法云三个主题数据...";
+
+    const requests = BAFA_TOPICS.map(function(topicConfig){
+        const url = `https://apis.bemfa.com/va/getmsg?uid=${BAFA_UID}&topic=${topicConfig.topic}&type=${BAFA_TYPE}&num=${currentDataCount}`;
+
+        return fetch(url)
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(result){
+                return {
+                    topicConfig: topicConfig,
+                    result: result
+                };
+            })
+            .catch(function(error){
+                console.log("读取主题失败：", topicConfig.topic, error);
+                return {
+                    topicConfig: topicConfig,
+                    result: null
+                };
+            });
+    });
+
+    Promise.all(requests).then(function(results){
+        const allData = {};
+        let totalCount = 0;
+        let latestUnix = 0;
+        let latestTime = "";
+
+        BAFA_TOPICS.forEach(function(topicConfig){
+            topicConfig.fields.forEach(function(field){
+                allData[field.key] = [];
+            });
+        });
+
+        results.forEach(function(pack){
+            const topicConfig = pack.topicConfig;
+            const result = pack.result;
+
+            if(result && result.code === 0 && result.data && result.data.length > 0){
+                const rows = result.data.map(function(item){
+                    return parseBafaRow(item, topicConfig);
+                }).filter(function(row){
+                    return row && row.values && row.values.length > 0;
+                });
+
+                rows.sort(function(a,b){
+                    return Number(a.unix || 0) - Number(b.unix || 0);
+                });
+
+                rows.forEach(function(row){
+                    topicConfig.fields.forEach(function(field, index){
+                        const value = row.values[index];
+
+                        if(value !== null && value !== undefined && !isNaN(value)){
+                            const dataItem = {
+                                topic: topicConfig.topic,
+                                time: row.time,
+                                unix: row.unix,
+                                msg: row.msg,
+                                name: field.name,
+                                key: field.key,
+                                type: field.type,
+                                unit: field.unit,
+                                value: value,
+                                displayValue: formatBafaValue(value, field)
+                            };
+
+                            allData[field.key].push(dataItem);
+                            totalCount++;
+
+                            if(Number(row.unix || 0) >= latestUnix){
+                                latestUnix = Number(row.unix || 0);
+                                latestTime = row.time || latestTime;
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        currentBafaData = allData;
+
+        renderBafaChart(currentBafaData);
+        updateLatestData(currentBafaData);
+
+        if(totalCount > 0){
+            document.getElementById("latestTime").innerText = latestTime || "--";
+            document.getElementById("bafaStatus").innerText = "数据已更新，当前显示六项数据，合计 " + totalCount + " 条记录。";
+        }else{
+            clearLatestData();
+            document.getElementById("latestTime").innerText = "--";
+            document.getElementById("bafaStatus").innerText = "暂无数据或读取失败，请检查UID、Topic、Type。";
+        }
+    });
+}
+
+function parseBafaRow(item, topicConfig){
+    const msg = String(item.msg || "").trim();
+
+    /*
+        硬件代码上传格式为：
+        环境温度#环境湿度，例如：31.6#50.3
+        土壤湿度#预警状态，例如：100.0#1
+        工作状态#预警类型，例如：1#5
+
+        这里按 # 分隔优先解析。
+        如果没有 #，再尝试提取数字。
+    */
+    let values = [];
+
+    if(msg.indexOf("#") !== -1){
+        values = msg.split("#").map(function(v){
+            return Number(String(v).trim());
+        });
+    }else{
+        const nums = msg.match(/-?\d+(\.\d+)?/g) || [];
+        values = nums.map(function(v){
+            return Number(v);
+        });
+    }
+
+    return {
+        time: item.time || "",
+        unix: item.unix || "",
+        msg: msg,
+        values: topicConfig.fields.map(function(field, index){
+            return values.length > index ? values[index] : null;
+        })
+    };
+}
+
+function formatBafaValue(value, field){
+    if(value === null || value === undefined || value === "" || isNaN(value)){
+        return "--";
+    }
+
+    const code = Number(value);
+
+    if(field.type === "workState"){
+        return WORK_STATE_TEXT.hasOwnProperty(code) ? WORK_STATE_TEXT[code] : "未知状态(" + code + ")";
+    }
+
+    if(field.type === "alarmState"){
+        return ALARM_STATE_TEXT.hasOwnProperty(code) ? ALARM_STATE_TEXT[code] : "未知预警状态(" + code + ")";
+    }
+
+    if(field.type === "warningType"){
+        return WARNING_TYPE_TEXT.hasOwnProperty(code) ? WARNING_TYPE_TEXT[code] : "未知预警类型(" + code + ")";
+    }
+
+    return value + (field.unit || "");
+}
+
+function renderBafaChart(dataMap){
+    initBafaChart();
+
+    const legendData = [];
+    const series = [];
+
+    BAFA_TOPICS.forEach(function(topicConfig){
+        topicConfig.fields.forEach(function(field){
+            const rows = dataMap[field.key] || [];
+            legendData.push(field.name);
+
+            series.push({
+                name: field.name,
+                type: "line",
+                smooth: true,
+                symbol: "circle",
+                connectNulls: true,
+                data: rows.map(function(item){
+                    return [item.time, item.value];
+                })
+            });
+        });
+    });
+
+    const option = {
+        title:{
+            text: "巴法云六项数据趋势图",
+            left:"center"
+        },
+        tooltip:{
+            trigger:"axis",
+            formatter:function(params){
+                let html = "";
+
+                if(params && params.length > 0){
+                    html += params[0].axisValue + "<br/>";
+                }
+
+                params.forEach(function(item){
+                    const field = findFieldByName(item.seriesName);
+                    let value = item.data ? item.data[1] : "--";
+
+                    if(field){
+                        value = formatBafaValue(value, field);
+                    }
+
+                    html += item.marker + item.seriesName + "：" + value + "<br/>";
+                });
+
+                return html;
+            }
+        },
+        legend:{
+            top:30,
+            data:legendData
+        },
+        grid:{
+            left:"4%",
+            right:"4%",
+            bottom:"12%",
+            top:"18%",
+            containLabel:true
+        },
+        xAxis:{
+            type:"category",
+            boundaryGap:false
+        },
+        yAxis:{
+            type:"value"
+        },
+        dataZoom:[
+            {
+                type:"inside"
+            },
+            {
+                type:"slider",
+                bottom:0
+            }
+        ],
+        series:series
+    };
+
+    bafaChart.setOption(option, true);
+}
+
+function findFieldByName(name){
+    for(let i = 0; i < BAFA_TOPICS.length; i++){
+        for(let j = 0; j < BAFA_TOPICS[i].fields.length; j++){
+            if(BAFA_TOPICS[i].fields[j].name === name){
+                return BAFA_TOPICS[i].fields[j];
+            }
+        }
+    }
+    return null;
+}
+
+function updateLatestData(dataMap){
+    BAFA_TOPICS.forEach(function(topicConfig){
+        topicConfig.fields.forEach(function(field){
+            const rows = dataMap[field.key] || [];
+            const latest = rows.length > 0 ? rows[rows.length - 1] : null;
+            const dom = document.getElementById(field.latestId);
+
+            if(dom){
+                dom.innerText = latest ? latest.displayValue : "--";
+            }
+        });
+    });
+}
+
+function clearLatestData(){
+    BAFA_TOPICS.forEach(function(topicConfig){
+        topicConfig.fields.forEach(function(field){
+            const dom = document.getElementById(field.latestId);
+            if(dom){
+                dom.innerText = "--";
+            }
+        });
+    });
+}
+
+function exportBafaExcel(){
+    if(!currentBafaData || Object.keys(currentBafaData).length === 0){
+        alert("当前没有可导出的数据，请先读取巴法云数据。");
+        return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    let hasData = false;
+
+    BAFA_TOPICS.forEach(function(topicConfig){
+        topicConfig.fields.forEach(function(field){
+            const rows = currentBafaData[field.key] || [];
+
+            if(rows.length > 0){
+                hasData = true;
+
+                const exportRows = rows.map(function(item, index){
+                    return {
+                        "序号": index + 1,
+                        "数据名称": field.name,
+                        "所属主题": item.topic,
+                        "时间": item.time,
+                        "Unix时间": item.unix,
+                        "原始消息": item.msg,
+                        "原始数值": item.value,
+                        "显示值": item.displayValue
+                    };
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(exportRows);
+
+                /*
+                    Excel 工作表名称最多 31 个字符。
+                    每一个展示数据独立一个 Sheet。
+                */
+                XLSX.utils.book_append_sheet(workbook, worksheet, field.name.substring(0, 31));
+            }
+        });
+    });
+
+    if(!hasData){
+        alert("当前没有可导出的数据，请先读取巴法云数据。");
+        return;
+    }
+
+    XLSX.writeFile(workbook, "巴法云六项数据汇总.xlsx");
+}
+
+window.addEventListener("resize", function(){
+    if(bafaChart){
+        bafaChart.resize();
+    }
+});
 </script>
 
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script src="/Static/js/jquery.js"></script><script src="/Static/js/Global.js"></script><script src="/Web/js/Global.js"></script><script src="/Web/js/XYChatGPT.js"></script></body>
+<script src="/Static/js/jquery.js"></script>
+<script src="/Static/js/Global.js"></script>
+<script src="/Web/js/Global.js"></script>
+<script src="/Web/js/XYChatGPT.js"></script>
+
+</body>
 </html>
